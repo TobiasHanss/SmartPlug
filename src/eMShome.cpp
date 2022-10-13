@@ -157,6 +157,13 @@ void eMShome::update(void)
 //************************************************************
 bool eMShome::connect(void)
 {
+
+  if (WiFi.status() != WL_CONNECTED) 
+  {
+    m_Conneced = false; 
+    return false;
+  }
+
   // Get access Tocken
   if (!getTocken())
   {

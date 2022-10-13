@@ -46,12 +46,11 @@ void WebIf::init(bool setupMode)
     }   
     else
     {    
-        m_oServer->on("/data.json", std::bind(&WebIf::onRequestData,this));
         m_oServer->on("/settings.post", HTTP_POST ,std::bind(&WebIf::onSettingsPost,this));
         m_oServer->on("/output.post", HTTP_POST ,std::bind(&WebIf::onOutputPost,this));
         m_oServer->on("/config.post", HTTP_POST ,std::bind(&WebIf::onConfigPost,this));
     }
-
+    m_oServer->on("/data.json", std::bind(&WebIf::onRequestData,this));
     m_oServer->on("/secure.json", std::bind(&WebIf::onSecure,this));
     m_oServer->serveStatic("/", SPIFFS, "/");
 

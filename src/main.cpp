@@ -7,13 +7,14 @@
 #include "output.h"
 #include <ArduinoOTA.h>
 #include <WiFiAP.h>
-
+#include "controls.h"
 
 
 CSettings Settings("/settings.json",1024);
 CSettings Config("/config.json",400);
 CSettings Secure("/secure.json",100);
 
+CControls Controls;
 COutput Outputs;
 WebIf   WebInterface(80);
 eMShome SmartMeter(Config.get("eMShomeIP"),Config.get("eMShomePW"));
@@ -80,28 +81,18 @@ void Connect2LocalWifi(void)
   char DevName[12];
   sDevName.toCharArray(DevName,sizeof(DevName));
   MDNS.begin(DevName);
-
-  bool LED;
+#if 0
+  Serial.printf("Connecting to %s...",Config.get("SSID"));
   while(WiFi.status() != WL_CONNECTED) 
   { 
-    delay(200);
-    Serial.print(".");
-    LED = !LED;
-    digitalWrite(LED_BULE,LED);
-  }
-   
-
-  // Check if connected to wifi
-  if(WiFi.status() != WL_CONNECTED) 
-  {
-      Serial.println("No Wifi!");
-      return;
+    delay(50);
+    //Serial.print(".");
+    Controls.ledRed(BLINK(250));
   }
 
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
+  Serial.print(",connected with IP Address: ");
   Serial.println(WiFi.localIP());
-  digitalWrite(LED_BULE,LOW);
+#endif
 }
 
 //************************************************************
@@ -112,30 +103,21 @@ void setup()
   Serial.println();
   Serial.println();
 
-  pinMode(RELAY, OUTPUT);
-  digitalWrite(RELAY,LOW);
+  bInSetupMode = Controls.checkLongPress(5000);
 
-  pinMode(LED_BULE, OUTPUT);
-  digitalWrite(LED_BULE,HIGH);
-
-  pinMode(LED_RED, OUTPUT);
-  digitalWrite(LED_RED,HIGH);
-
-  pinMode(BUTTON, INPUT);
-
-  if (Secure.get("PSK"))
+  if (bInSetupMode)
+  {
+    SetupAP();
+    WebInterface.init(bInSetupMode);
+  }
+  else
   {
     Connect2LocalWifi();
     SetupOTA();
     SmartMeter.connect();
     WebInterface.init(bInSetupMode);
   }
-  else
-  {
-    bInSetupMode = true;
-    SetupAP();
-    WebInterface.init(bInSetupMode);
-  }
+
 }
 
 
@@ -151,8 +133,8 @@ void loop()
     ArduinoOTA.handle();
   }
   WebInterface.update();
+  Controls.update();
 
-  //DisplayUpdate();
   delay(50);
 }
 

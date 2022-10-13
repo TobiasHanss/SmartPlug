@@ -29,6 +29,7 @@ public:
 
   void update(void);
   bool connect(void);
+  bool isConnected(void) {return m_Conneced;} 
 
   int32_t getActivePower_W(uint8_t Line);  //Line: 0 => Total; 1 => L1; 3 => L3; 3 => L3
   uint64_t getEpoch (void) {return m_Seconds;}

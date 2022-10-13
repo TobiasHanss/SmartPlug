@@ -1,5 +1,4 @@
 #include "output.h"
-
 #include "eMShome.h"
 #include "settings.h"
 
@@ -8,6 +7,9 @@ extern CSettings Settings;
 
 COutput::COutput(void)
 {
+    pinMode(RELAY1, OUTPUT);
+    digitalWrite(RELAY1,LOW);
+
     for (uint8_t i = 0; i < NO_OF_RULES; i++)
     { 
         m_bRule[i] = false;
@@ -23,29 +25,12 @@ void COutput::update(void)
     if (m_iNextUpdateTime < Time)
     {  
         m_iNextUpdateTime = Time + 1000;
-        checkOutputs();
-    }
-    readButton();
-    digitalWrite(RELAY,m_bOutput);
-    digitalWrite(LED_RED,!m_bOutput);
-}
-
-void COutput::readButton(void)
-{
-    static bool ButtonOld = true;
-    bool Button = digitalRead(BUTTON);
-    if (ButtonOld != Button)
-    {  
-        if (Button == false)
-        {
-            m_bOutput = !m_bOutput;
-        }
-        ButtonOld = Button;   
+        checkRules();
     }
 }
 
 
-void COutput::checkOutputs(void)
+void COutput::checkRules(void)
 {
     int32_t iOnAt;
     int32_t iOffAt;
@@ -90,14 +75,16 @@ void COutput::checkOutputs(void)
         }
     }
 
-    if (bResult != m_bOutput)
+    m_iDelayCounter ++;
+    if (bResult != m_bRouleResult)
     {
-        if (m_bOutput)
+        if (m_bRouleResult)
         {  
             int32_t OffDelay  = Settings.getInt("OFF_DELAY");
             if (m_iDelayCounter >= OffDelay) 
             {
-                m_bOutput= false;
+                m_bRouleResult= false;
+                setHW(false);
             }
         } 
         else
@@ -105,7 +92,8 @@ void COutput::checkOutputs(void)
             int32_t OnDelay  = Settings.getInt("ON_DELAY");
             if (m_iDelayCounter >= OnDelay) 
             {
-                m_bOutput= true;
+                m_bRouleResult= true;
+                setHW(true);
             }
         }
     }
@@ -113,4 +101,14 @@ void COutput::checkOutputs(void)
     {
         m_iDelayCounter = 0;
     }
+}
+
+void COutput::setHW(bool Value)
+{
+    digitalWrite(RELAY1,Value);
+}
+
+bool COutput::getHW(void)
+{
+    return digitalRead(RELAY1);
 }
