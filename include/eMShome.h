@@ -10,7 +10,7 @@
 using namespace websockets;
 
 //The Server sends data all 250ms. In order to reduce the CPU load skip ever x msg
-#define SKIP_EVER_x_MSG  2 
+#define SKIP_EVER_x_MSG  4 
 
 class eMShome
 {

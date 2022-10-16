@@ -1,14 +1,14 @@
-# ABL eMS home smart plug.
+# ABL eMS home smart plug
 ## _A ESP32 project_
 
-This project is written for a smart plug to turn on and off an electrical load depending on the excess energy from the photovoltaic array. The smart plug can fully controlled and configured via its own WebPage. 
+This project is written for a smart plug to turn on and off an 
+electrical load depending on the excess energy from the photovoltaic array. The smart plug can fully controlled and configured via its own WebPage. 
 
 ![N|Solid](WebIF.png)
 
 ## Function:
 In my case, the smart meter was installed directly after the utility meter in order to see if the house is providing or receiving power.
-The smart plug opens a connection to the smart meter to get this information.
-The socket is then switched on and off via adjustable threshold values. Mains phase and an on/off delay can be selected.
+The smart plug opens a connection to the smart meter to get this information.The socket is then switched on and off via adjustable threshold values. Mains phase and an on/off delay can be selected.
 
 ## Hardware:
 I bought a "Usmart SP1-2" smart plug, removed its radio module and "installed" a preprogrammed ESP32-Wroom Module instead.
@@ -27,3 +27,10 @@ However, the data format used here is rubbish. To be honest, I didn't understand
 To establish the WebSocket connection you have to have a access token. A simple POST message with the eMS password is sufficient to receive this token.
 Fun Fact: The eMS enforces a 12-digit password on its website and then sends it unencrypted to its server. This is how it has to be done folks, a longer PW makes the system more secure ;-)
 It's all encapsulated into the eMShome class.
+
+## Development environment:
+It's a MS Visual Studio Code project using the Platform IO plugin.
+
+Extern libs:
+- bblanchon/ArduinoJson@^6.19.4
+- gilmaimon/ArduinoWebsockets@^0.5.3 --->> NOTE: This lib was altert in order to get it working with the eMS home

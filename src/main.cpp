@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <esp_task_wdt.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include "settings.h"
@@ -20,6 +21,9 @@ WebIf   WebInterface(80);
 eMShome SmartMeter(Config.get("eMShomeIP"),Config.get("eMShomePW"));
 
 bool bInSetupMode = false;
+
+#define WDT_TIMEOUT_s  10
+
 
 //************************************************************
 //************************************************************
@@ -86,8 +90,7 @@ void Connect2LocalWifi(void)
   while(WiFi.status() != WL_CONNECTED) 
   { 
     delay(50);
-    //Serial.print(".");
-    Controls.ledRed(BLINK(250));
+    Serial.print(".");
   }
 
   Serial.print(",connected with IP Address: ");
@@ -102,8 +105,18 @@ void setup()
   Serial.begin(115200);
   Serial.println();
   Serial.println();
+  Serial.print("Starting... ");
+
+  btStop();
+
+  //esp_task_wdt_init(WDT_TIMEOUT_s, true); //enable panic so ESP32 restarts
+  //esp_task_wdt_add(NULL); //add current thread to WDT watch
 
   bInSetupMode = Controls.checkLongPress(5000);
+
+  #ifndef INVERT_BUTTON
+    bInSetupMode = !bInSetupMode;
+  #endif
 
   if (bInSetupMode)
   {
@@ -113,10 +126,11 @@ void setup()
   else
   {
     Connect2LocalWifi();
-    SetupOTA();
     SmartMeter.connect();
     WebInterface.init(bInSetupMode);
   }
+
+  SetupOTA();
 
 }
 
@@ -130,12 +144,13 @@ void loop()
   {
     Outputs.update();
     SmartMeter.update();
-    ArduinoOTA.handle();
   }
+  ArduinoOTA.handle();
   WebInterface.update();
   Controls.update();
 
-  delay(50);
+  //esp_task_wdt_reset();
+  delay(20);
 }
 
 

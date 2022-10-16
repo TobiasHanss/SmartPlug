@@ -96,7 +96,7 @@ eMShome::eMShome(String IP, String PW)
     if (m_SkipCounter ++ >= SKIP_EVER_x_MSG)
     {
       decodeMessage(message.data());
-      //printMeasurmen();
+      printMeasurmen();
       m_SkipCounter = 0;
     }
   }
@@ -487,7 +487,7 @@ void eMShome::printMeasurmen (void)
     {
        float Value = dataPoint[i].Value;
        Value = (Value / pow(10,dataPoint[i].PowerOfTen))*dataPoint[i].Sign;
-       //qDebug("%s: %.1f %s\n",dataPoint[i].Name,Value,dataPoint[i].Unit);
+       Serial.printf("%s: %.1f %s\n",dataPoint[i].Name,Value,dataPoint[i].Unit);
        //DisplayPrint(0, Y+=10,"%s: %.1f %s\n",dataPoint[i].Name,Value,dataPoint[i].Unit);
     }
   }

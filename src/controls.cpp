@@ -27,6 +27,7 @@ void CControls::update(void)
 
 void CControls::updateLEDs(void)
 {
+    static int Reconnect = 0;
 
     if (bInSetupMode)
     {
@@ -38,6 +39,11 @@ void CControls::updateLEDs(void)
         ledBlue(false);
         ledRed(BLINK(250));
         Outputs.set(false);
+        if (millis() > Reconnect)
+        {
+            WiFi.reconnect();
+            Reconnect = millis() + 5000;
+        }
     }
     else if (!SmartMeter.isConnected())
     {
