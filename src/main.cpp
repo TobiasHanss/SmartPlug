@@ -107,7 +107,7 @@ void setup()
   Serial.println();
   Serial.print("Starting... ");
 
-  btStop();
+  //btStop();
 
   //esp_task_wdt_init(WDT_TIMEOUT_s, true); //enable panic so ESP32 restarts
   //esp_task_wdt_add(NULL); //add current thread to WDT watch
@@ -121,17 +121,14 @@ void setup()
   if (bInSetupMode)
   {
     SetupAP();
-    WebInterface.init(bInSetupMode);
   }
   else
   {
     Connect2LocalWifi();
-    SmartMeter.connect();
-    WebInterface.init(bInSetupMode);
   }
 
+  WebInterface.init(bInSetupMode);
   SetupOTA();
-
 }
 
 
@@ -150,7 +147,7 @@ void loop()
   Controls.update();
 
   //esp_task_wdt_reset();
-  delay(20);
+  delay(50);
 }
 
 

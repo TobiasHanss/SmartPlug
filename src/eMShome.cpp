@@ -90,6 +90,8 @@ eMShome::eMShome(String IP, String PW)
   m_IP = IP;
   m_PW = PW;
   
+  m_Conneced = false;
+
   // install Callback
   m_oWSClient.onMessage([&](WebsocketsMessage message)
   { 
