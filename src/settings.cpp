@@ -1,11 +1,11 @@
 #include "settings.h"
-#include "debug.h"
+
 
 
 CSettings::CSettings(const char *sFileName, size_t maxSize )
 {
     if (!SPIFFS.begin(true)) {
-        fail("SPIFFS init failed");
+        Serial.println("SPIFFS init failed");
     }
     m_pJSON = new DynamicJsonDocument(maxSize);
     m_sFileName = sFileName;

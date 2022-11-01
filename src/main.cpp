@@ -85,7 +85,7 @@ void Connect2LocalWifi(void)
   char DevName[12];
   sDevName.toCharArray(DevName,sizeof(DevName));
   MDNS.begin(DevName);
-#if 0
+#if 1
   Serial.printf("Connecting to %s...",Config.get("SSID"));
   while(WiFi.status() != WL_CONNECTED) 
   { 
@@ -144,7 +144,7 @@ void loop()
   }
   ArduinoOTA.handle();
   WebInterface.update();
-  Controls.update();
+  //Controls.update();
 
   //esp_task_wdt_reset();
   delay(50);

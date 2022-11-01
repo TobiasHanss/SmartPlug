@@ -1,5 +1,5 @@
+#include <Arduino.h>
 #include "WebIf.h"
-#include "debug.h"
 #include <SPIFFS.h> 
 #include <ArduinoJson.h>
 #include "eMShome.h"
@@ -34,7 +34,7 @@ void WebIf::init(bool setupMode)
 {
 
     if (!SPIFFS.begin(true)) {
-        fail("SPIFFS init failed");
+        Serial.println("SPIFFS init failed");
     }
 
     //listFiles();
@@ -118,13 +118,21 @@ void WebIf::onSettingsPost(void)
 
 void WebIf::onOutputPost(void)
 {
-    Outputs.set(false);
+    bool Out[NO_OF_OUTPUT] = {false,false,false,false};
 
     for (int i = 0 ; i < m_oServer->args();i++ )
     {
-        if (m_oServer->argName(i) == "OUT1") {Outputs.set(true);}
+        if (m_oServer->argName(i) == "OUT1") {Out[0] = true;}
+        if (m_oServer->argName(i) == "OUT2") {Out[1] = true;}
+        if (m_oServer->argName(i) == "OUT3") {Out[2] = true;}
+        if (m_oServer->argName(i) == "OUT4") {Out[3] = true;}
     }
-
+    
+    for (int i = 0 ; i < NO_OF_OUTPUT ; i++)
+    {
+        Outputs.set(i,Out[i]);
+    }
+    
     m_oServer->send(200, "text/plain", ""); //Send web page
 }
 
@@ -151,13 +159,16 @@ void WebIf::onRequestData(void)
     static int i = 0 ;
 
     oJSON["Epoch"] = String(SmartMeter.getEpoch());
-    oJSON["L1_W"] = String(SmartMeter.getActivePower_W(1));    
-    oJSON["L2_W"] = String(SmartMeter.getActivePower_W(2)); 
-    oJSON["L3_W"] = String(SmartMeter.getActivePower_W(3)); 
+    oJSON["L1_W"]  = String(SmartMeter.getActivePower_W(1));    
+    oJSON["L2_W"]  = String(SmartMeter.getActivePower_W(2)); 
+    oJSON["L3_W"]  = String(SmartMeter.getActivePower_W(3)); 
     oJSON["ALL_W"] = String(SmartMeter.getActivePower_W(0)); 
     oJSON["LOCAL_IP"] = WiFi.localIP();
-    oJSON["MAC"]    = WiFi.macAddress();  
-    oJSON["OUT1"] = Outputs.getOnOff();
+    oJSON["MAC"]  = WiFi.macAddress();  
+    oJSON["OUT1"] = Outputs.getOnOff(0);
+    oJSON["OUT2"] = Outputs.getOnOff(1);
+    oJSON["OUT3"] = Outputs.getOnOff(2);
+    oJSON["OUT4"] = Outputs.getOnOff(3);            
     String buf;
     serializeJson(oJSON,buf);
     m_oServer->send(200, "application/json", buf);

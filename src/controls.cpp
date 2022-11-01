@@ -38,7 +38,6 @@ void CControls::updateLEDs(void)
     {
         ledBlue(false);
         ledRed(BLINK(250));
-        Outputs.set(false);
         if (millis() > Reconnect)
         {
             WiFi.reconnect();
@@ -47,14 +46,12 @@ void CControls::updateLEDs(void)
     }
     else if (!SmartMeter.isConnected())
     {
-        Outputs.set(false);
         ledBlue(false);
         ledRed(true);
     }
     else
     {
         ledRed(false);
-        ledBlue(Outputs.get());
     }
 }
 
@@ -67,7 +64,7 @@ void CControls::readButton(void)
     {  
         if (Button == false)
         {
-            Outputs.toggle();
+            Outputs.toggle(3);
         }
         ButtonOld = Button;   
     }

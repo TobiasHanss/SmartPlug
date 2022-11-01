@@ -101,7 +101,10 @@
         <div> 
           <table  style="width: 100%" BORDER="0">
             <tr>
-              <th style="text-align:center">Output</th>
+              <th style="text-align:center">Output 1</th>
+              <th style="text-align:center">Output 2</th>
+              <th style="text-align:center">Output 3</th>
+              <th style="text-align:center">Output 4</th>
             </tr>
             <tr>
               <td style="text-align:center">  
@@ -110,7 +113,26 @@
                   <span class="slider"></span>
                 </label>
               </td>
+              <td style="text-align:center">  
+                <label class="switch">
+                  <input type="checkbox" id="OUT2" name="OUT2" onclick="this.form.submit()">
+                  <span class="slider"></span>
+                </label>
+              </td>
+              <td style="text-align:center">  
+                <label class="switch">
+                  <input type="checkbox" id="OUT3" name="OUT3" onclick="this.form.submit()">
+                  <span class="slider"></span>
+                </label>
+              </td>
+              <td style="text-align:center">  
+                <label class="switch">
+                  <input type="checkbox" id="OUT4" name="OUT4" onclick="this.form.submit()">
+                  <span class="slider"></span>
+                </label>
+              </td>
             </tr>
+            
           </table> 
         </div>
     </form>
@@ -120,7 +142,7 @@
       <br><b>Switching rules:</b> <hr>
       <table BORDER="0">
         <tr>
-          <th style="width: 30px;">Rule</th>
+          <th style="width: 30px;">Out</th>
           <th style="width: 30px;">Line</th>
           <th style="width: 50px; text-align:center">On @</th>
           <th style="width: 40px;"></th>
@@ -165,7 +187,6 @@
           <td style="text-align:center"><input type="checkbox" id="R4_EN" name="R4_EN"></td>
         </tr>
       </table> 
-      <font size="1">Note: All enabled rule must apply in order to switch the output.</font>
       <br>
       <br>
       

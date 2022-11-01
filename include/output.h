@@ -3,21 +3,24 @@
 
 #include "Arduino.h"
 
-#define NO_OF_RULES 4
-#define RELAY1   26
+#define NO_OF_OUTPUT 4
+#define RELAY1   16
+#define RELAY2   4
+#define RELAY3   2
+#define RELAY4   15
 
 class COutput
 {
 public:
     COutput();
     
-    void setOnOff(char * State){ setHW(((State[0] == 'o') & (State[1] == 'n')) ? true : false); }
-    void set(bool State) { setHW(State); }
+    void setOnOff(uint8_t No, char * State){ setHW(No,((State[0] == 'o') & (State[1] == 'n')) ? true : false); }
+    void set(uint8_t No,bool State) { setHW(No, State); }
 
-    String getOnOff(void) { if(getHW())return "on"; return "off";}
-    bool get(void) {return getHW();}
+    String getOnOff(uint8_t No) { if(getHW(No))return "on"; return "off";}
+    bool get(uint8_t No) {return getHW(No);}
 
-    void toggle(void){setHW(!getHW());}
+    void toggle(uint8_t No){setHW(No, !getHW(No));}
 
     void update(void);
     void readButton(void);
@@ -25,12 +28,13 @@ public:
 
 private:
     void checkRules(void);
-    void setHW(bool Value);
-    bool getHW(void);
+    void setHW(uint8_t No, bool Value);
+    bool getHW(uint8_t No);
 
-    bool m_bRouleResult;
-    bool m_bRule[NO_OF_RULES];
-    uint32_t m_iDelayCounter;
+    bool m_bOutput[NO_OF_OUTPUT];
+    bool m_bOutput_Old[NO_OF_OUTPUT];
+    uint32_t m_iDelayCounter[NO_OF_OUTPUT];
+
     unsigned long m_iNextUpdateTime;
 };
 

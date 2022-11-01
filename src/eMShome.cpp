@@ -1,5 +1,4 @@
 #include "eMShome.h"
-#include "debug.h"
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
@@ -98,7 +97,7 @@ eMShome::eMShome(String IP, String PW)
     if (m_SkipCounter ++ >= SKIP_EVER_x_MSG)
     {
       decodeMessage(message.data());
-      printMeasurmen();
+      //printMeasurmen();
       m_SkipCounter = 0;
     }
   }
@@ -182,7 +181,7 @@ bool eMShome::connect(void)
   } 
   else 
   {
-      qDebug("%s(): Can't connected to WebSocked!\n",__func__);
+      Serial.printf("%s(): Can't connected to WebSocked!\n",__func__);
   }
   return m_Conneced;
 }
@@ -203,7 +202,7 @@ bool eMShome::getTocken(void)
   
   if (httpResponseCode != 200)
   {
-    qDebug("Can't get access tocken, Post failed! (%d)",httpResponseCode);
+    Serial.printf("Can't get access tocken, Post failed! (%d)",httpResponseCode);
     return false;
   }  
   
@@ -264,7 +263,7 @@ uint32_t eMShome::getUInt32(void)
     m_pos +=5;
     if ( m_pos > m_buf.length() )
     {
-        qDebug("%s(): Error=?\n",__func__);
+        Serial.printf("%s(): Error=?\n",__func__);
     }
 
     return Value;
@@ -282,7 +281,7 @@ uint64_t eMShome::getUint64(void)
     {
         for (; t < 3 ;++t )
         {
-            if (m_pos >= m_buf.length()) qDebug("%s(): ERROR1!",__func__);
+            if (m_pos >= m_buf.length()) Serial.printf("%s(): ERROR1!",__func__);
 
             nLo = (nLo | (0x7f & (unsigned char)m_buf[m_pos]) << 7 * t);
             if ((unsigned char)m_buf[m_pos++] < 0x80)
@@ -326,7 +325,7 @@ uint64_t eMShome::getUint64(void)
     {
         for ( ; t < 5 ;++t )
         {
-            if (m_pos >= m_buf.length()) qDebug("%s(): ERROR2!\n",__func__);
+            if (m_pos >= m_buf.length()) Serial.printf("%s(): ERROR2!\n",__func__);
             nHi = (nHi | (0x7f & (unsigned char)m_buf[m_pos]) << ((7 * t) + 3));
             if ((unsigned char)m_buf[m_pos++] < 0x80)
             {
@@ -335,7 +334,7 @@ uint64_t eMShome::getUint64(void)
         }
     }
 
-    qDebug("%s(): ERROR3!\n",__func__);
+    Serial.printf("%s(): ERROR3!\n",__func__);
     return 0;
 }
 
@@ -348,7 +347,7 @@ String eMShome::getString(void)
     uint32_t end   = m_pos+len;
     if (end >= m_buf.length())
     {
-        qDebug("%s(): ERROR!\n",__func__);
+        Serial.printf("%s(): ERROR!\n",__func__);
         return "ERR!";
     }
     m_pos += len;
@@ -375,7 +374,7 @@ void eMShome::isTimeSamp(void)
        {
        case(1): m_Seconds = getUint64();  break;
        case(2): m_NanoSec = getUInt32();  break;
-       default: qDebug("skip type(8)!");  break;
+       default: Serial.printf("skip type(8)!");  break;
        }
     }
 }
@@ -409,7 +408,7 @@ void eMShome::GDRDecode(void)
                    {
                    case(1): Key = getUint64();break;
                    case(2): Value  = getUint64(); break;
-                   default: qDebug("skip type(4)!\n");break;
+                   default: Serial.printf("skip type(4)!\n");break;
                    }
                 }
                 updateDataPoint(Key,Value);
@@ -422,12 +421,12 @@ void eMShome::GDRDecode(void)
                    switch (type >> 3)
                    {
                    case(1): Serial.print("??:"); Serial.println( getString());  break;
-                   case(2): qDebug("FlexValue.decode, not implemented\n");  break;
-                   default: qDebug("skip type(5)!\n");break;
+                   case(2): Serial.printf("FlexValue.decode, not implemented\n");  break;
+                   default: Serial.printf("skip type(5)!\n");break;
                    }
                 }
             }break;
-        default: qDebug("skip type(6)!\n");break;
+        default: Serial.printf("skip type(6)!\n");break;
         }
     }
 }
@@ -454,12 +453,12 @@ void eMShome::decodeMessage(String message)
                    {
                    case(1): m_Name = getString();  break;
                    case(2): GDRDecode(); break;
-                   default: qDebug("unknown type(2)!\n");break;
+                   default: Serial.printf("unknown type(2)!\n");break;
                    }
                 }
               }break;
           case(2): Serial.print("uuis:"); Serial.println( getString()); break;
-          default: qDebug("unknown type(1)!\n");break;
+          default: Serial.printf("unknown type(1)!\n");break;
         }
     }
 }

@@ -5,7 +5,7 @@
 
 #define LED_BLUE 33
 #define LED_RED 32
-#define BUTTON  27
+#define BUTTON  35
 
 #define BLINK(Time) (((millis()%(Time*2)))<Time)
 
