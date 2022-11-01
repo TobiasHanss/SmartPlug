@@ -9,7 +9,7 @@
 #include <ArduinoOTA.h>
 #include <WiFiAP.h>
 #include "controls.h"
-
+#include "tempSens.h"
 
 CSettings Settings("/settings.json",1024);
 CSettings Config("/config.json",400);
@@ -19,6 +19,8 @@ CControls Controls;
 COutput Outputs;
 WebIf   WebInterface(80);
 eMShome SmartMeter(Config.get("eMShomeIP"),Config.get("eMShomePW"));
+CTempSens TempSens;
+
 
 bool bInSetupMode = false;
 
@@ -98,6 +100,8 @@ void Connect2LocalWifi(void)
 #endif
 }
 
+
+
 //************************************************************
 //************************************************************
 void setup() 
@@ -129,6 +133,9 @@ void setup()
 
   WebInterface.init(bInSetupMode);
   SetupOTA();
+
+
+  //xTaskCreate(RT,"Read Temp",1000,NULL,1,NULL );
 }
 
 
@@ -148,6 +155,8 @@ void loop()
 
   //esp_task_wdt_reset();
   delay(50);
+
+
 }
 
 
