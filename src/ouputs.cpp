@@ -1,6 +1,8 @@
+#include <Arduino.h>
 #include "output.h"
 #include "eMShome.h"
 #include "settings.h"
+#include "task.h"
 
 extern eMShome SmartMeter;
 extern CSettings Settings;
@@ -29,6 +31,18 @@ COutput::COutput(void)
     m_iNextUpdateTime = millis() +1000;
 }
 
+void COutput::begin (void)
+{
+    xTaskCreate(taskHandler,"COutput",512*4,this,1,NULL );
+}
+
+void COutput::taskHandler (void * ClassPointer)
+{
+    while(1){
+        static_cast<COutput*> (ClassPointer)->update();
+        delay(450);
+    }
+}
 
 void COutput::update(void)
 {
@@ -61,11 +75,14 @@ void COutput::checkRules(void)
         iOffAt = Settings.getInt(nRx_OFF);
         nRx_OFF[1] += 1; //Increment Rx_OFF
         
-        iPower = SmartMeter.getActivePower_W(i+1);
+        if (i == 3)
+            iPower = SmartMeter.getActivePower_W(0); //Total Power is on index 0
+        else
+            iPower = SmartMeter.getActivePower_W(i+1);
 
         if (bEnabled)
         {
-            //Serial.printf("OutNo:%d State:%d OnAt:%d OffAt:%d Power:%d \n",i,m_Out[i],iOnAt,iOffAt,iPower);
+            //Serial.printf("OutNo:%d State:%d OnAt:%d OffAt:%d Power:%d \n",i,m_bOutput[i],iOnAt,iOffAt,iPower);
             if (m_bOutput[i])
             {
                 if (iPower >= iOffAt)
@@ -84,22 +101,23 @@ void COutput::checkRules(void)
 
             if (m_bOutput[i] != m_bOutput_Old[i])
             {
+                m_iDelayCounter[i] ++;
                 if (m_bOutput[i])
                 {
-                    int32_t OffDelay  = Settings.getInt("OFF_DELAY");
+                    int32_t OffDelay  = Settings.getInt("ON_DELAY");
                     if (m_iDelayCounter[i] >= OffDelay) 
                     {
-                        m_bOutput_Old[i]= false;
-                        setHW(i,false);
+                        m_bOutput_Old[i]= true;
+                        setHW(i,true);
                     }
                 }
                 else
                 {
-                    int32_t OnDelay  = Settings.getInt("ON_DELAY");
+                    int32_t OnDelay  = Settings.getInt("OFF_DELAY");
                     if (m_iDelayCounter[i] >= OnDelay) 
                     {
-                        m_bOutput_Old[i]= true;
-                        setHW(i,true);
+                        m_bOutput_Old[i]= false;
+                        setHW(i,false);
                     }
                 }
             }
@@ -121,7 +139,7 @@ void COutput::setHW(uint8_t No, bool Value)
         case(3): digitalWrite(RELAY4,Value); break;
         default: Serial.printf("%s(): Bug: Unknown output! (%d)\n",__func__, No);
     }
-    Serial.printf("%s():No:%d to %d\n",__func__,No,Value);
+    //Serial.printf("%s():No:%d to %d\n",__func__,No,Value);
 
 }
 
