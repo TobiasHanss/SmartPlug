@@ -1,16 +1,18 @@
 #ifndef __WEBIF__
 #define __WEBIF__
-#include <WebServer.h>  // standard library
+
+#include <SPIFFS.h> 
+#include <WebServer.h> 
 
 class WebIf
 {
 public:
     WebIf(int nPort);
 
-    void init(bool setupMode = false);
-    void update(void);
+    void begin(bool setupMode = false);
 
 private:
+    static void taskHandler (void * ClassPointer);
 
     void onRequestData(void);
     void onSettingsPost(void);

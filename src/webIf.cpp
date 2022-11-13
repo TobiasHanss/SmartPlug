@@ -1,22 +1,32 @@
 #include <Arduino.h>
-#include "WebIf.h"
 #include <SPIFFS.h> 
+#include <WiFi.h>
 #include <ArduinoJson.h>
 #include "eMShome.h"
 #include "settings.h"
-#include <WiFi.h>
+#include "webIf.h"
 #include "output.h"
+#include "logging.h"
+#include "task.h"
 
 extern eMShome SmartMeter;
 extern CSettings Settings;
 extern CSettings Config;
 extern CSettings Secure;
 extern COutput Outputs;
-
+extern CLogging Logging;
 
 WebIf::WebIf(int nPort)
 {
     m_oServer = new WebServer(nPort);
+}
+
+void WebIf::taskHandler (void * ClassPointer)
+{
+    while(1){
+        static_cast<WebIf*> (ClassPointer)->m_oServer->handleClient();
+        delay(50);
+    }
 }
 
 void WebIf::listFiles()
@@ -30,7 +40,7 @@ void WebIf::listFiles()
     }
 }
 
-void WebIf::init(bool setupMode)
+void WebIf::begin(bool setupMode)
 {
 
     if (!SPIFFS.begin(true)) {
@@ -55,6 +65,7 @@ void WebIf::init(bool setupMode)
     m_oServer->serveStatic("/", SPIFFS, "/");
 
     m_oServer->begin();
+    xTaskCreate(taskHandler,"CWebIf",512*6,this,3,NULL );
 }
 
 void WebIf::onSetup(void)
@@ -168,14 +179,12 @@ void WebIf::onRequestData(void)
     oJSON["OUT1"] = Outputs.getOnOff(0);
     oJSON["OUT2"] = Outputs.getOnOff(1);
     oJSON["OUT3"] = Outputs.getOnOff(2);
-    oJSON["OUT4"] = Outputs.getOnOff(3);            
+    oJSON["OUT4"] = Outputs.getOnOff(3);  
+    oJSON["TEMP1"] = Logging.getSensor(0);     
+    oJSON["TEMP2"] = Logging.getSensor(1);       
     String buf;
     serializeJson(oJSON,buf);
     m_oServer->send(200, "application/json", buf);
 }
 
-void WebIf::update(void)
-{
-    m_oServer->handleClient();
-}
 

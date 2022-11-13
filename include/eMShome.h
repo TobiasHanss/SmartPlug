@@ -1,8 +1,6 @@
 #ifndef __EMSHOME__
 #define __EMSHOME__
 
-#include "Arduino.h"
-
 //NOTE!: Changes on the generateHandshake() function in the websockets_client.cpp (@ArduinoWebsockets library)
 // Remove User-Agent and Origion parameters
 #include <ArduinoWebsockets.h>
@@ -16,7 +14,6 @@ class eMShome
 {
 public:
   eMShome(String IP,String PW);
-  ~eMShome();
   
   typedef struct{
        uint64_t Key;        // Key defined by eMShome is the Measurment ID, the value came in mixed order. So, you need to use the Key (ID)
@@ -27,7 +24,8 @@ public:
        char const *Unit;      // Measurment Unit 
   }sDataPoint;
 
-  void update(void);
+  void begin (void);
+
   bool connect(void);
   bool isConnected(void) {return m_Conneced;} 
 
@@ -36,6 +34,8 @@ public:
 
 private:
 
+  static void taskHandler (void * ClassPointer);
+  void update(void);
   void decodeMessage(String message);
 
   uint32_t getUInt32(void); //extraced form eMShome WebIF -> JavaScript 

@@ -2,30 +2,32 @@
 #include <esp_task_wdt.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
-#include "settings.h"
-#include "eMShome.h"
-#include "WebIf.h"
-#include "output.h"
 #include <ArduinoOTA.h>
 #include <WiFiAP.h>
-#include "controls.h"
-#include "tempSens.h"
+#include "settings.h"
+#include "eMShome.h"
+#include "webIf.h"
+#include "output.h"
+#include "logging.h"
+#include "task.h"
+#include "mqtt.h"
+
+#define WDT_TIMEOUT_s  10
+
 
 CSettings Settings("/settings.json",1024);
 CSettings Config("/config.json",400);
 CSettings Secure("/secure.json",100);
 
-CControls Controls;
 COutput Outputs;
 WebIf   WebInterface(80);
 eMShome SmartMeter(Config.get("eMShomeIP"),Config.get("eMShomePW"));
-CTempSens TempSens;
+CLogging Logging;
+Cmqtt     mqtt;
 
 
 bool bInSetupMode = false;
-
-#define WDT_TIMEOUT_s  10
-
+volatile bool bInitDone = false;
 
 //************************************************************
 //************************************************************
@@ -87,7 +89,8 @@ void Connect2LocalWifi(void)
   char DevName[12];
   sDevName.toCharArray(DevName,sizeof(DevName));
   MDNS.begin(DevName);
-#if 1
+  
+#if 0
   Serial.printf("Connecting to %s...",Config.get("SSID"));
   while(WiFi.status() != WL_CONNECTED) 
   { 
@@ -111,31 +114,16 @@ void setup()
   Serial.println();
   Serial.print("Starting... ");
 
-  //btStop();
-
-  //esp_task_wdt_init(WDT_TIMEOUT_s, true); //enable panic so ESP32 restarts
-  //esp_task_wdt_add(NULL); //add current thread to WDT watch
-
-  bInSetupMode = Controls.checkLongPress(5000);
-
-  #ifndef INVERT_BUTTON
-    bInSetupMode = !bInSetupMode;
-  #endif
-
-  if (bInSetupMode)
-  {
-    SetupAP();
-  }
-  else
   {
     Connect2LocalWifi();
+    Logging.begin();
+    Outputs.begin();
+    SmartMeter.begin();
   }
 
-  WebInterface.init(bInSetupMode);
+  WebInterface.begin(bInSetupMode);
   SetupOTA();
-
-
-  //xTaskCreate(RT,"Read Temp",1000,NULL,1,NULL );
+  
 }
 
 
@@ -144,19 +132,18 @@ void setup()
 //************************************************************
 void loop() 
 {
-  if (!bInSetupMode)
-  {
-    Outputs.update();
-    SmartMeter.update();
-  }
+
+    if(WiFi.status() != WL_CONNECTED) 
+    {
+       WiFi.reconnect();
+    }
+
+
+
+
+
   ArduinoOTA.handle();
-  WebInterface.update();
-  //Controls.update();
-
-  //esp_task_wdt_reset();
-  delay(50);
-
-
+  delay(2000);
 }
 
 

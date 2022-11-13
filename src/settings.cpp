@@ -1,6 +1,5 @@
+#include <Arduino.h>
 #include "settings.h"
-
-
 
 CSettings::CSettings(const char *sFileName, size_t maxSize )
 {

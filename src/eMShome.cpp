@@ -1,8 +1,8 @@
-#include "eMShome.h"
+#include <Arduino.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-
-
+#include "eMShome.h"
+#include "task.h"
 
 eMShome::sDataPoint dataPoint[]={
 
@@ -129,9 +129,20 @@ eMShome::eMShome(String IP, String PW)
 
 //************************************************************
 //************************************************************
-eMShome::~eMShome()
+void eMShome::begin (void)
 {
+    xTaskCreate(taskHandler,"eMShome",512*6,this,1,NULL );
+}
 
+//************************************************************
+//************************************************************
+void eMShome::taskHandler (void * ClassPointer)
+{
+    while(1){
+        //printStack();
+        static_cast<eMShome*> (ClassPointer)->update();
+        delay(250);
+    }
 }
 
 //************************************************************

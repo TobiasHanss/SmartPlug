@@ -1,7 +1,6 @@
 #ifndef __SETTINGS__
 #define __SETTINGS__
 
-#include "Arduino.h"
 #include <ArduinoJson.h>
 #include <SPIFFS.h>
 
